@@ -1,2 +1,7 @@
 transformers
 googletrans==3.1.0a0
+sentencepiece
+torch
+tqdm
+sklearn
+torchtext
