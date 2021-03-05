@@ -2,7 +2,6 @@ from functools import partial
 from typing import List
 from pathlib import Path
 
-import torch
 from torch.utils.data import Dataset, DataLoader
 from googletrans import Translator
 
@@ -55,11 +54,9 @@ def get_loader(data_src: List[str], data_target: List[str], tokenizer, **kwargs)
     )
     return loader
 
+
 def load_yandex_data(en_path, ru_path):
     en_text = Path(en_path).read_text().split('\n')
     ru_text = Path(ru_path).read_text().split('\n')
 
     return en_text, ru_text
-
-def indices_to_words(tokenizer, indices):
-    return tokenizer.decode(indices)

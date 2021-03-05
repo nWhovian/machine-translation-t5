@@ -7,33 +7,15 @@ from sklearn.model_selection import train_test_split
 from torchtext.data.metrics import bleu_score
 from transformers import AutoTokenizer
 
-from data import get_loader, load_yandex_data, indices_to_words
+from data import get_loader, load_yandex_data
 
 
 def main():
     root = Path('/home/vladbakhteev/data/mt')
     ru_path = root / 'corpus.en_ru.1m.ru'
     en_path = root / 'corpus.en_ru.1m.en'
-    en_text, ru_text = load_yandex_data(en_path, ru_path)
 
-    en_train, en_valid, ru_train, ru_valid = train_test_split(en_text, ru_text, test_size=0.2, random_state=42)
-    tokenizer = AutoTokenizer.from_pretrained('t5-small')
-    train_loader = get_loader(
-        data_src=ru_train,
-        data_target=en_train,
-        tokenizer=tokenizer,
-        batch_size=16,
-        shuffle=True,
-        drop_last=True
-    )
-    valid_loader = get_loader(
-        data_src=ru_valid,
-        data_target=en_valid,
-        tokenizer=tokenizer,
-        batch_size=2,
-        shuffle=False,
-        drop_last=False
-    )
+    train_loader, valid_loader, tokenizer = get_loaders_and_tokenizer(en_path, ru_path)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     config = T5Config.from_pretrained('t5-small')
@@ -70,6 +52,31 @@ def main():
 
         score = bleu_score(predicted, gt)
         print(f'Epoch {epoch}, BLEU: {score}')
+
+
+def get_loaders_and_tokenizer(en_path, ru_path):
+    en_text, ru_text = load_yandex_data(en_path, ru_path)
+    en_train, en_valid, ru_train, ru_valid = train_test_split(en_text, ru_text, test_size=0.2, random_state=42)
+
+    tokenizer = AutoTokenizer.from_pretrained('t5-small')
+    train_loader = get_loader(
+        data_src=ru_train,
+        data_target=en_train,
+        tokenizer=tokenizer,
+        batch_size=16,
+        shuffle=True,
+        drop_last=True
+    )
+    valid_loader = get_loader(
+        data_src=ru_valid,
+        data_target=en_valid,
+        tokenizer=tokenizer,
+        batch_size=2,
+        shuffle=False,
+        drop_last=False
+    )
+
+    return train_loader, valid_loader, tokenizer
 
 
 if __name__ == '__main__':
