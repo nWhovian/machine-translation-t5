@@ -38,13 +38,10 @@ def collate_fn_wo_tokenizer(batch, tokenizer):
     src = [sample[0] for sample in batch]
     target = [sample[1] for sample in batch]
 
-    src_encoded = tokenizer(src, padding=True).input_ids
-    target_encoded = tokenizer(target, padding=True).input_ids
+    src_encoded = tokenizer(src, padding=True, return_tensors="pt").input_ids
+    target_encoded = tokenizer(target, padding=True, return_tensors="pt").input_ids
 
-    src_encoded = torch.tensor(src_encoded)
-    target_encoded = torch.tensor(target_encoded)
-
-    return src_encoded, target_encoded
+    return src_encoded, target_encoded, src
 
 
 def get_loader(data_src: List[str], data_target: List[str], tokenizer, **kwargs):
