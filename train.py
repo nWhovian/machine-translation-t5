@@ -1,14 +1,13 @@
 from pathlib import Path
+from collections import OrderedDict
 
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
-from tqdm import tqdm
+from pytorch_lightning.loggers import TensorBoardLogger
 from transformers import T5Config, AdamW, T5ForConditionalGeneration
 from sklearn.model_selection import train_test_split
-from torchtext.data.metrics import bleu_score
 from transformers import AutoTokenizer
-from collections import OrderedDict
 
 from data import get_loader, load_yandex_data
 
@@ -98,9 +97,11 @@ def main():
         verbose=True,
         mode="min"
     )
+    logger = TensorBoardLogger('tb_logs', name='machine-translation-logs')
 
     trainer = pl.Trainer(
         gpus=None,
+        logger=logger,
         # checkpoint_callback=checkpoint_callback,
         # max_epochs=100,
         # early_stop_callback=early_stop_callback,
