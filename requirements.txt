@@ -5,3 +5,4 @@ torch
 tqdm
 sklearn
 torchtext
+pytorch_lightning
