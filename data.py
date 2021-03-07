@@ -1,3 +1,4 @@
+import random
 from functools import partial
 from typing import List
 from pathlib import Path
@@ -7,14 +8,22 @@ from googletrans import Translator
 
 
 class TranslationDataset(Dataset):
-    def __init__(self, sentences_ru, sentences_en):
+    def __init__(self, sentences_ru, sentences_en, augment_p):
         self.sentences_ru = sentences_ru
         self.sentences_en = sentences_en
+        self.augment_p = augment_p
         self.translator = Translator()
 
     def __getitem__(self, index):
         src = self.sentences_ru[index]
         target = self.sentences_en[index]
+
+        if self.augment_p > 0:
+            if random.uniform(0, 1) < self.augment_p:
+                src = self.augment_ru(src)
+            if random.uniform(0, 1) < self.augment_p:
+                target = self.augment_en(target)
+
         return src, target
 
     def augment_ru(self, text):
@@ -43,10 +52,10 @@ def collate_fn_wo_tokenizer(batch, tokenizer):
     return src_encoded, target_encoded, src
 
 
-def get_loader(data_src: List[str], data_target: List[str], tokenizer, **kwargs):
+def get_loader(data_src: List[str], data_target: List[str], tokenizer, augment_p, **kwargs):
     collate_fn = partial(collate_fn_wo_tokenizer, tokenizer=tokenizer)
 
-    dataset = TranslationDataset(data_src, data_target)
+    dataset = TranslationDataset(data_src, data_target, augment_p)
     loader = DataLoader(
         dataset,
         collate_fn=collate_fn,

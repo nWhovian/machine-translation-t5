@@ -13,7 +13,7 @@ class T5Model(pl.LightningModule):
         self.model = T5ForConditionalGeneration(config=config)
 
     def configure_optimizers(self):
-        return AdamW(self.model.parameters(), lr=1e-2)
+        return AdamW(self.model.parameters(), lr=0.01/16)
 
     def training_step(self, batch, batch_idx):
         src_batch, target_batch, _ = batch
@@ -42,13 +42,15 @@ class T5Model(pl.LightningModule):
         # score = bleu_score(predicted, gt)
         # self.log('bleu_score', score, on_step=False, on_epoch=True, prog_bar=True)
 
-    def optimizer_step(self, epoch_nb, batch_nb, optimizer, optimizer_i, opt_closure):
-        adjust_optim(optimizer, batch_nb)
-
-        optimizer.step()
-        # Faster than optimizer.zero_grad()
-        for param in self.model.parameters():
-            param.grad = None
+    # def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_idx, optimizer_closure, on_tpu, using_native_amp,
+    #                    using_lbfgs):
+    #     adjust_optim(optimizer, batch_idx)
+    #     print(batch_idx)
+    #
+    #     optimizer.step()
+    #     # Faster than optimizer.zero_grad()
+    #     for param in self.model.parameters():
+    #         param.grad = None
 
 
 def adjust_optim(optimizer, n_iter, k=10000):

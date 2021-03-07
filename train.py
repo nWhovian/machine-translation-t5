@@ -18,7 +18,7 @@ def main():
     train_loader, valid_loader, tokenizer = get_loaders_and_tokenizer(en_path, ru_path)
     model = T5Model(tokenizer)
 
-    checkpoint_callback = ModelCheckpoint()
+    checkpoint_callback = ModelCheckpoint(save_weights_only=True)
     logger = TensorBoardLogger('tb_logs', name='machine-translation-logs')
     trainer = pl.Trainer(
         gpus=1,
@@ -44,15 +44,17 @@ def get_loaders_and_tokenizer(en_path, ru_path, smaller_size=None):
         data_src=ru_train,
         data_target=en_train,
         tokenizer=tokenizer,
+        augment_p=0,
         batch_size=8,
         shuffle=True,
         drop_last=True,
-        num_workers=1,
+        num_workers=4,
     )
     valid_loader = get_loader(
-        data_src=ru_valid,
-        data_target=en_valid,
+        data_src=ru_valid[:50],
+        data_target=en_valid[:50],
         tokenizer=tokenizer,
+        augment_p=0,
         batch_size=128,
         shuffle=False,
         drop_last=False,
